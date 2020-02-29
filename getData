@@ -1,0 +1,53 @@
+---
+title: "STA141B"
+author: "Iva Huang"
+date: "2020.02.08"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(jsonlite)
+library(httr)
+#url <- str_glue("https://api.harvardartmuseums.org/object", lat = 39.0968, long = -120.0324)
+
+r <- GET(
+  "https://api.harvardartmuseums.org/object",
+  query = list(
+    apikey = "bc3fb240-5a61-11ea-b877-8f943796feb8",
+    title= "rabbit",
+    classification= "Paintings"
+  )
+)
+
+stop_for_status(r)
+
+json <- content(r, as = "text")
+library(dplyr)
+
+data = as.data.frame(fromJSON(json))
+data
+
+# labels I am interested in, as results of exploring the dataset
+
+# record.classification (classificationid)
+# record.medium
+# records.century
+# record.creditline
+# records.dateend (?), datebegin 
+# exhibitioncount
+# dimensions
+# uniquepageviews
+# relatedcount
+# division
+# title
+# id == objectid
+# department
+# culture
+# period
+# dated # is the period when object is made
+# color
+```
