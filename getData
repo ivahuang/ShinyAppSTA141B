@@ -51,3 +51,19 @@ data
 # dated # is the period when object is made
 # color
 ```
+# mandy's code
+# get object's data
+```{r}
+library(jsonlite)
+library(httr)
+```
+
+```{r}
+object <- GET(
+  "https://api.harvardartmuseums.org/Object", 
+  query = list(
+    apikey = "c08f4b60-5a63-11ea-8cff-0d9fd01ffb33"))
+stop_for_status(object)
+json <- content(object, as = "text")
+fromJSON(json)
+```
