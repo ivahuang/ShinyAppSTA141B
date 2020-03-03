@@ -67,3 +67,56 @@ stop_for_status(object)
 json <- content(object, as = "text")
 fromJSON(json)
 ```
+
+#grace's code:
+
+#century
+```{r}
+library(jsonlite)
+library(httr)
+#url <- str_glue("https://api.harvardartmuseums.org/century", lat = 39.0968, long = -120.0324)
+
+r <- GET(
+  "https://api.harvardartmuseums.org/century",
+  query = list(
+    apikey = "17d19f10-5a62-11ea-8cff-0d9fd01ffb33"
+  )
+)
+
+stop_for_status(r)
+json <- content(r, as = "text")
+library(dplyr)
+
+data = as.data.frame(fromJSON(json))
+data
+```
+
+#image
+```{r}
+r <- GET(
+  "https://api.harvardartmuseums.org/image",
+  query = list(
+    apikey = "17d19f10-5a62-11ea-8cff-0d9fd01ffb33"
+  )
+)
+
+stop_for_status(r)
+json <- content(r, as = "text")
+library(dplyr)
+
+data = as.data.frame(fromJSON(json))
+data
+image<- data%>%
+  select(records.baseimageurl)
+
+```
+
+
+```{r}
+library(magick)
+k<- as.character(image[2,])
+k<-image_read(k)
+image_scale(k, "x300")
+```
+#I can do century
+#also some ideas of presenting image in shinyapp
