@@ -40,4 +40,28 @@ mydata1%>%plot_ly(x = ~objectcount, y = ~name)
 
 #ink<-mydata1%>%filter(str_detect(tolower(name),"ink"))%>%mutate(count=sum(objectcount))%>%mutate(name = "Ink")
 ```
+```{r}
+mydata3<-data.frame()
+for (i in 1:3311){
+r <- GET(
+  "https://api.harvardartmuseums.org/object",
+  query = list(
+    apikey = "bc3fb240-5a61-11ea-b877-8f943796feb8",
+    period = "any",
+    century = "any",
+    medium = "any",
+    classification = "any",
+    culture = "any",
+    page = 1
+  )
+)
+stop_for_status(r)
+json <- content(r, as = "text")
+fromJSON(json)
+k<-as.data.frame(fromJSON(json))%>%
+  select(records.century,records.period,records.culture,records.medium,records.classification,records.title)
+mydata3<-rbind(mydata3,k)
+}
+mydata3
 
+```
