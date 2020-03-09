@@ -64,4 +64,6 @@ mydata3<-rbind(mydata3,k)
 }
 mydata3
 
+fig<-mydata3%>%count(records.century)%>%plot_ly(lables = ~as.factor(records.century), values = ~n,type = "pie")
+fig
 ```
