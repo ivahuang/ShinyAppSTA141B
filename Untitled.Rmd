@@ -1,0 +1,69 @@
+---
+title: "project1"
+author: "Zhenghang Guo"
+date: "2/28/2020"
+output: html_document
+---
+```{r}
+library(tidyverse)
+library(jsonlite)
+library(httr)
+library(stringr)
+```
+
+
+```{r}
+mydata<-data.frame()
+for (i in 1:28){
+     r <- GET(
+  "https://api.harvardartmuseums.org/medium",
+  query = list(
+    apikey = "17d19f10-5a62-11ea-8cff-0d9fd01ffb33",
+    page = i
+      )
+    )
+   stop_for_status(r)
+  json <- content(r, as = "text")
+  mydata<-rbind(mydata,as.data.frame(fromJSON(json)$records))
+}
+mydata
+```
+
+
+
+```{r}
+library(plotly)
+mydata1<-mydata[order(-as.numeric(as.character(mydata$objectcount))),]%>%select(objectcount,name)%>% drop_na()
+mydata1%>%plot_ly(x = ~objectcount, y = ~name)
+
+#metal<-mydata1%>%filter(str_detect(tolower(name),"metal"))%>%filter(!str_detect(tolower(name),"ink"))%>%mutate(count=sum(objectcount))%>%mutate(name = "Metal")
+
+#ink<-mydata1%>%filter(str_detect(tolower(name),"ink"))%>%mutate(count=sum(objectcount))%>%mutate(name = "Ink")
+```
+```{r}
+mydata3<-data.frame()
+for (i in 1:3311){
+r <- GET(
+  "https://api.harvardartmuseums.org/object",
+  query = list(
+    apikey = "bc3fb240-5a61-11ea-b877-8f943796feb8",
+    period = "any",
+    century = "any",
+    medium = "any",
+    classification = "any",
+    culture = "any",
+    page = 1
+  )
+)
+stop_for_status(r)
+json <- content(r, as = "text")
+fromJSON(json)
+k<-as.data.frame(fromJSON(json))%>%
+  select(records.century,records.period,records.culture,records.medium,records.classification,records.title)
+mydata3<-rbind(mydata3,k)
+}
+mydata3
+
+fig<-mydata3%>%count(records.century)%>%plot_ly(lables = ~as.factor(records.century), values = ~n,type = "pie")
+fig
+```
