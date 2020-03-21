@@ -11,7 +11,7 @@ for (i in 1:80){
   r <- GET(
     "https://api.harvardartmuseums.org/Object",
     query = list(
-      apikey = "c08f4b60-5a63-11ea-8cff-0d9fd01ffb33",
+      apikey = Sys.getenv("KEY"),
       page = i
     )
   )
