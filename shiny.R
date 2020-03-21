@@ -1,15 +1,33 @@
 library(tidyverse)
 library(jsonlite)
-library(httr)
 library(shiny)
+library(plotly)
+library(httr)
 
-object <- GET(
-  "https://api.harvardartmuseums.org/Object", 
-  query = list(
-    apikey = "c08f4b60-5a63-11ea-8cff-0d9fd01ffb33"))
-stop_for_status(object)
-json <- content(object, as = "text")
-a <-fromJSON(json)
+# generate the data
+mydata3<-data.frame()
+
+for (i in 1:80){
+  r <- GET(
+    "https://api.harvardartmuseums.org/Object",
+    query = list(
+      apikey = "c08f4b60-5a63-11ea-8cff-0d9fd01ffb33",
+      page = i
+    )
+  )
+  
+  stop_for_status(r)
+  json <- content(r, as = "text")
+  
+  k <- as.data.frame(fromJSON(json)) %>% 
+    select(records.title,records.accessionyear,records.url,records.images,records.culture,records.division,records.century,records.classification,records.people)
+  
+  mydata3 <- rbind(mydata3,k)
+}
+
+createLink <- function(val) {
+  sprintf('<a href="https://www.google.com/#q=%s" target="_blank" class="btn btn-primary">Info</a>', val)
+}
 
 ui <- fluidPage(
   
@@ -21,12 +39,14 @@ ui <- fluidPage(
     sidebarPanel(
       selectInput(inputId = "century",
                   label = "Select century of the exhibits:",
-                  choices = unique(a$century),
+                  choices = unique(mydata3$records.century),
                   selected = "17th century")
     ),
   
   mainPanel(
-    tabPanel("Exhibit's Details",  tableOutput("detail"))
+    tabsetPanel(tabPanel("Exhibit's Details",  dataTableOutput("detail")),
+                tabPanel("What Culture the Exhibit Comes From", plotlyOutput(outputId = "pieChart"))
+                )
   )
 )
 )
@@ -35,21 +55,36 @@ server <- function(input, output) {
   
   #Filter based on input
   aa <- reactive({
-    filter(a, origin == input$century)
+    filter(mydata3, !str_detect(records.century, "NA")) %>% 
+      filter(records.century == input$century)
   })
   
   # Render data table for selected flights
   output$dtab <- renderDataTable(aa())
   
-  # Generate min, max, mean and median of corresponding arrival delay
-  output$detail <- renderTable({
-    if (length(input$checkBox) == 0) {
-      return (NULL)
-    }
+  output$pieChart <- renderPlotly({
+    aa <- aa()
+    fig <- plot_ly(aa, labels = ~records.culture, values = ~records.accessionyear, type = 'pie') %>% 
+      layout(title = paste('Piechat of Culture Based on', input$century),
+                          xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+                          yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
+               
     
-    filter(aa(), origin == input$century) %>%
-      select(century, title, url)
+    fig
   })
+  
+  # Generate min, max, mean and median of corresponding arrival delay
+  output$detail <- renderDataTable({
+    aa <- aa()
+    
+    my_table <- filter(aa, records.century == input$century) %>%
+      select(records.title, records.accessionyear, records.classification, records.url) %>% 
+      rename(Title = records.title, Year = records.accessionyear, Details = records.url, Classification = records.classification)
+    
+    my_table$Details <- createLink(my_table$Details)
+    
+    my_table
+  }, escape = FALSE)
 }
 
 # Create Shiny app
