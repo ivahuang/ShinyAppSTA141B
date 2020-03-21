@@ -1,8 +1,12 @@
 # ShinyAppSTA141B
 
+# Please refer to "A peek of art - final code" for our complete code for the app!
+
+Below were in-team communication.
 # GetData:
 Code on downloading data from API. Feel free to add yours to the file or ask questions on how to get data to teammates.
-
+# KnowTheArtist:
+Our thought on first feature! Please debug by Mar.5.
 
 
 # API:
@@ -20,5 +24,5 @@ This document has
 After all teammates review your changes to the code, we will merge it to the master branch!
 
 
-# Next Dsicussion Time and Goal:
-We'll discuss on Monday@11am, to finalize the function of our ShinyApp, division of work and ddl!
+# Next Discussion Time and Goal:
+We'll discuss on Monday@11am, to finalize report details!
